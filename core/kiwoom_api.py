@@ -502,8 +502,14 @@ class KiwoomApi:
             # kt00007 응답: acnt_ord_cntr_prps_dtl 리스트
             exec_list = body.get("acnt_ord_cntr_prps_dtl", [])
 
+            # 디버그: 응답 구조 확인
+            if exec_list:
+                print(f"[체결조회 DEBUG] {len(exec_list)}건 조회됨. 첫 건: {exec_list[0]}")
+            else:
+                print(f"[체결조회 DEBUG] acnt_ord_cntr_prps_dtl 비어있음. 응답 키: {list(body.keys())}")
+
             # ord_no에 해당하는 체결 건 찾기
-            target_ord_no = str(ord_no).strip()
+            target_ord_no = str(ord_no).strip().lstrip('0')  # 앞자리 0 제거하여 매칭
             filled_qty = 0
             total_amount = 0
 
@@ -511,8 +517,9 @@ class KiwoomApi:
                 if not isinstance(item, dict):
                     continue
 
-                item_ord_no = str(item.get("ord_no", "")).strip()
-                if item_ord_no != target_ord_no:
+                item_ord_no = str(item.get("ord_no", "")).strip().lstrip('0')
+                raw_ord_no = str(item.get("ord_no", "")).strip()
+                if item_ord_no != target_ord_no and raw_ord_no != str(ord_no).strip():
                     continue
 
                 # cntr_qty: 체결수량, cntr_uv: 체결단가
