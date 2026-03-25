@@ -74,7 +74,10 @@ class TraderLogic:
                     os.environ.setdefault(k.strip(), v.strip())
 
         config = configparser.ConfigParser()
-        config.read("config.ini", encoding="utf-8")
+        try:
+            config.read("config.ini", encoding="utf-8")
+        except Exception:
+            print("[설정] config.ini 로드 실패 — 환경변수/기본값 사용")
         self.config = config
 
         # 2) API 키 로드 (환경변수 우선 → config.ini 폴백)

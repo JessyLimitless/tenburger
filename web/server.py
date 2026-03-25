@@ -173,14 +173,18 @@ async def startup():
     global logic, _ws_loop, _position_push_timer
     _ws_loop = asyncio.get_event_loop()
 
-    logic = TraderLogic()
-    logic.account_update.connect(_on_account_update)
-    logic.log_update.connect(_on_log_update)
-    logic.condition_list_update.connect(_on_condition_list)
-    logic.signal_detected.connect(_on_signal_detected)
-    logic.signal_realtime_update.connect(_on_signal_realtime)
+    try:
+        logic = TraderLogic()
+        logic.account_update.connect(_on_account_update)
+        logic.log_update.connect(_on_log_update)
+        logic.condition_list_update.connect(_on_condition_list)
+        logic.signal_detected.connect(_on_signal_detected)
+        logic.signal_realtime_update.connect(_on_signal_realtime)
 
-    logic.initialize_background()
+        logic.initialize_background()
+    except Exception as e:
+        print(f"[Web] TraderLogic 초기화 실패 (서버는 계속 실행): {e}")
+        logic = None
 
     # 포지션 Push 타이머
     _position_push_timer = RepeatingTimer(2.0, _push_positions)
