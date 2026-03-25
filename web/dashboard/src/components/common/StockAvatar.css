@@ -1,0 +1,11 @@
+/* StockAvatar — 원형 (토스 스타일) */
+.stock-avatar-img{
+  border-radius:50%;object-fit:contain;
+  background:var(--bg-secondary);flex-shrink:0;
+}
+.stock-avatar-initial{
+  border-radius:50%;background:var(--bg-secondary);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:var(--text-muted);flex-shrink:0;
+  font-size:13px;
+}

@@ -1,0 +1,14 @@
+[KIWOOM_API]
+app_key = YOUR_APP_KEY_HERE
+app_secret = YOUR_APP_SECRET_HERE
+
+[GLOBAL_SETTINGS]
+condition_seq = 1
+buy_amount = 5000
+max_stocks = 1
+start_time = 09:00
+end_time = 15:30
+
+[SELL_STRATEGY:기본 매도 전략]
+stop_loss_rate = -2.0
+profit_cut_rate = 2.0

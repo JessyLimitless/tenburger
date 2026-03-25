@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#FAFAFA">
+<title>DART Trading</title>
+<style>
+/* ══════ DART Insight Theme Vars (1:1 copy) ══════ */
+@font-face{font-family:'Pretendard Variable';src:url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css')}
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+:root{
+  --bg-primary:#FAFAFA;--bg-card:#FFFFFF;--bg-dark:#18181B;--bg-dark-hover:#27272A;
+  --border:#E4E4E7;--border-light:#F4F4F5;
+  --text-primary:#18181B;--text-secondary:#52525B;--text-muted:#A1A1AA;
+  --accent:#DC2626;--positive:#DC2626;--negative:#2563EB;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.04),0 2px 6px rgba(0,0,0,.04);
+  --shadow-md:0 4px 8px rgba(0,0,0,.06),0 12px 24px -4px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 16px rgba(0,0,0,.08),0 20px 40px -8px rgba(0,0,0,.12);
+  --overlay-bg:rgba(0,0,0,.5);
+}
+[data-theme="dark"]{
+  --bg-primary:#09090B;--bg-card:#18181B;--bg-dark:#09090B;--bg-dark-hover:#18181B;
+  --border:#27272A;--border-light:#18181B;
+  --text-primary:#FAFAFA;--text-secondary:#A1A1AA;--text-muted:#71717A;
+  --accent:#EF4444;--positive:#EF4444;--negative:#60A5FA;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.2);--shadow-md:0 4px 12px rgba(0,0,0,.3);--shadow-lg:0 10px 25px rgba(0,0,0,.4);
+  --overlay-bg:rgba(0,0,0,.7);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg-primary);font-family:'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--text-primary);font-size:14px;-webkit-font-smoothing:antialiased;line-height:1.4}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+/* ══════ App Shell ══════ */
+.app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg-card);position:relative}
+@media(min-width:481px){.app{box-shadow:var(--shadow-lg)}}
+
+/* ══════ Header — DART Insight 스타일 (56px, blur) ══════ */
+.hd{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border-light)}
+[data-theme="dark"] .hd{background:rgba(9,9,11,.97)}
+.hd-logo{display:flex;align-items:center;gap:10px}
+.hd-logo-icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#FF6B6B);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.hd-logo-text{font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:-.3px}
+.hd-logo-text em{font-style:normal;color:var(--accent);font-weight:800}
+.hd-dots{display:flex;gap:5px;margin-left:4px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s}
+.dot.on{background:#059669;box-shadow:0 0 0 3px rgba(5,150,105,.15)}
+.dot.live{background:var(--accent);box-shadow:0 0 0 3px rgba(220,38,38,.15);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hd-r{display:flex;align-items:center;gap:2px}
+.ic{width:40px;height:40px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all .15s}
+.ic:active{background:var(--border-light);transform:scale(.95)}
+.ic svg{width:20px;height:20px}
+
+/* ══════ Account — 토스 스타일 + DART 색상 ══════ */
+.acct{padding:20px 20px 16px}
+.acct-label{font-size:13px;color:var(--text-muted);font-weight:500}
+.acct-total{font-size:30px;font-weight:800;color:var(--text-primary);margin:6px 0 2px;letter-spacing:-.8px}
+.acct-pnl{font-size:14px;font-weight:600}
+.acct-pnl.up{color:var(--positive)}.acct-pnl.down{color:var(--negative)}.acct-pnl.flat{color:var(--text-muted)}
+.acct-chips{display:flex;gap:10px;margin-top:16px}
+.chip{flex:1;background:var(--bg-primary);border:1px solid var(--border-light);border-radius:14px;padding:14px 16px;transition:border-color .2s,box-shadow .2s}
+.chip-label{font-size:12px;color:var(--text-muted);font-weight:500}
+.chip-value{font-size:17px;font-weight:700;color:var(--text-primary);margin-top:4px}
+
+/* ══════ Action Button ══════ */
+.act-area{padding:0 20px 8px}
+.act-btn{width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
+.act-btn:active{transform:scale(.97);opacity:.85}
+.act-go{background:var(--bg-dark);color:#fff}
+[data-theme="dark"] .act-go{background:var(--border);color:var(--text-primary)}
+.act-stop{background:var(--bg-primary);color:var(--accent);border:1px solid var(--border)}
+
+/* ══════ Tabs — DART Insight 스타일 ══════ */
+.tabs{display:flex;padding:0 20px;border-bottom:1px solid var(--border-light);position:sticky;top:56px;background:var(--bg-card);z-index:40}
+[data-theme="dark"] .tabs{background:var(--bg-card)}
+.tab{padding:13px 0;margin-right:20px;font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab:hover{color:var(--text-secondary)}
+.tab.on{color:var(--text-primary);border-color:var(--accent)}
+
+/* ══════ Stock Item — DART Insight CompanyCard 스타일 ══════ */
+.list{padding:4px 0 120px}
+.item{display:flex;align-items:center;padding:14px 20px;transition:background .1s}
+.item:active{background:var(--bg-primary)}
+.item-av{width:40px;height:40px;border-radius:12px;background:var(--bg-primary);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--text-secondary);margin-right:12px;flex-shrink:0}
+.item-body{flex:1;min-width:0}
+.item-name{font-size:15px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:6px}
+.item-sub{font-size:12px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-r{text-align:right;flex-shrink:0;margin-left:10px}
+.item-price{font-size:15px;font-weight:700;color:var(--text-primary)}
+.item-chg{font-size:12px;font-weight:600;margin-top:2px}
+.item-chg.up{color:var(--positive)}.item-chg.down{color:var(--negative)}.item-chg.flat{color:var(--text-muted)}
+
+/* ══════ Badges — DART Insight GradeBadge 스타일 ══════ */
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;line-height:1.4;font-family:'Pretendard Variable',sans-serif;animation:badgePop .3s ease-out}
+@keyframes badgePop{0%{transform:scale(.7)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+.badge-w{background:rgba(37,99,235,.08);color:#2563EB}
+[data-theme="dark"] .badge-w{background:rgba(96,165,250,.12);color:#60A5FA}
+.badge-t{background:rgba(5,150,105,.08);color:#059669}
+[data-theme="dark"] .badge-t{background:rgba(16,185,129,.12);color:#10B981}
+.badge-h{background:rgba(220,38,38,.06);color:var(--accent)}
+.badge-s{background:rgba(220,38,38,.06);color:var(--accent)}
+
+/* ══════ FAB ══════ */
+.fab{position:fixed;bottom:28px;right:50%;transform:translateX(calc(240px - 30px));width:52px;height:52px;border-radius:16px;background:var(--bg-dark);color:#fff;border:none;font-size:24px;font-weight:400;cursor:pointer;box-shadow:var(--shadow-lg);z-index:60;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.fab:active{transform:translateX(calc(240px - 30px)) scale(.92)}
+@media(max-width:480px){.fab{right:20px;transform:none}.fab:active{transform:scale(.92)}}
+
+/* ══════ Overlay + Drawer — DART Insight 모달 스타일 ══════ */
+.ov{position:fixed;inset:0;background:var(--overlay-bg);z-index:100;opacity:0;visibility:hidden;transition:all .25s}
+.ov.show{opacity:1;visibility:visible}
+.dw{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;background:var(--bg-card);border-radius:20px 20px 0 0;z-index:101;transition:transform .35s cubic-bezier(.32,.72,0,1);padding:0 20px env(safe-area-inset-bottom,32px);max-height:92vh;overflow-y:auto}
+.dw.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:480px){.dw{left:0;transform:translateY(100%)}.dw.show{transform:translateY(0)}}
+.dw-bar{width:36px;height:4px;border-radius:2px;background:var(--border);margin:10px auto 24px}
+.dw-title{font-size:20px;font-weight:800;color:var(--text-primary);margin-bottom:24px;letter-spacing:-.3px}
+
+/* ══════ Fields ══════ */
+.fld{margin-bottom:18px}
+.fld-l{font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:7px}
+.fld-i{width:100%;padding:14px 16px;border:1px solid var(--border);border-radius:14px;font-size:15px;color:var(--text-primary);outline:none;background:var(--bg-card);font-family:inherit;transition:border .2s,box-shadow .2s}
+.fld-i:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(220,38,38,.08)}
+[data-theme="dark"] .fld-i:focus{box-shadow:0 0 0 3px rgba(239,68,68,.1)}
+.fld-i::placeholder{color:var(--text-muted)}
+select.fld-i{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A1A1AA' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.fld-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Search dropdown */
+.sr{border:1px solid var(--border);border-radius:14px;margin-top:-10px;margin-bottom:14px;overflow:hidden;max-height:220px;overflow-y:auto;background:var(--bg-card);box-shadow:var(--shadow-md)}
+.sr-i{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;transition:background .1s}
+.sr-i:active{background:var(--bg-primary)}
+.sr-i+.sr-i{border-top:1px solid var(--border-light)}
+.sr-n{font-weight:600;font-size:14px;color:var(--text-primary)}
+.sr-c{font-size:12px;color:var(--text-muted)}
+
+/* Price preview — DART CompanyCard hero 스타일 */
+.pv{background:var(--bg-primary);border:1px solid var(--border-light);border-radius:16px;padding:18px;margin-bottom:18px}
+.pv-top{display:flex;justify-content:space-between;align-items:flex-start}
+.pv-nm{font-size:17px;font-weight:700;color:var(--text-primary)}
+.pv-cd{font-size:12px;color:var(--text-muted);margin-top:2px}
+.pv-pr{font-size:24px;font-weight:800;text-align:right;letter-spacing:-.5px}
+.pv-ch{font-size:13px;font-weight:600;text-align:right;margin-top:2px}
+.pv-pr.up,.pv-ch.up{color:var(--positive)}.pv-pr.down,.pv-ch.down{color:var(--negative)}
+
+/* Full button */
+.btn-f{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-f:active{transform:scale(.97);opacity:.85}
+.btn-f:disabled{background:var(--border-light)!important;color:var(--text-muted)!important;cursor:default;transform:none;opacity:1}
+.btn-dark{background:var(--bg-dark);color:#fff}
+[data-theme="dark"] .btn-dark{background:var(--border);color:var(--text-primary)}
+.btn-accent{background:var(--accent);color:#fff}
+
+/* Settings */
+.set-i{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--border-light)}
+.set-i:last-child{border-bottom:none}
+.set-l{font-size:14px;color:var(--text-secondary)}
+.set-v{width:90px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;text-align:right;outline:none;background:var(--bg-card);font-family:inherit;color:var(--text-primary)}
+.set-v:focus{border-color:var(--accent)}
+
+/* Empty — DART Insight EmptyState */
+.empty{text-align:center;padding:64px 24px}
+.empty-ic{font-size:44px;margin-bottom:14px}
+.empty-t{font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:4px}
+.empty-s{font-size:14px;color:var(--text-muted);line-height:1.6}
+
+/* Toast — DART Insight Toast 스타일 */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--bg-dark);color:#FAFAFA;padding:13px 24px;border-radius:14px;font-size:14px;font-weight:600;z-index:200;box-shadow:var(--shadow-lg);animation:toastIn .3s ease-out}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%)}}
+
+/* Log */
+.log{padding:14px 20px;border-bottom:1px solid var(--border-light)}
+.log-t{font-size:11px;color:var(--text-muted)}
+.log-a{font-size:13px;font-weight:700;margin:3px 0}
+.c-buy{color:var(--positive)}.c-sell{color:var(--negative)}.c-sys{color:var(--text-muted)}.c-exec{color:#7C3AED}.c-warn{color:#D97706}.c-err{color:var(--accent)}
+.log-d{font-size:12px;color:var(--text-muted);line-height:1.5}
+
+/* Delete btn */
+.x-btn{background:none;border:none;padding:10px;margin-left:2px;color:var(--text-muted);cursor:pointer;border-radius:8px;transition:all .1s}
+.x-btn:active{background:var(--border-light);transform:scale(.9)}
+.x-btn svg{width:16px;height:16px}
+
+/* ══════ Animations — DART Insight ══════ */
+.fi{animation:fadeIn .25s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card-enter{animation:cardEnter .45s cubic-bezier(.32,.72,0,1)}
+@keyframes cardEnter{from{opacity:0;transform:scale(.99) translateY(16px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<div class="hd">
+  <div class="hd-logo">
+    <div class="hd-logo-icon">D</div>
+    <span class="hd-logo-text">DART <em>Trading</em></span>
+    <div class="hd-dots"><span class="dot" id="dW"></span><span class="dot" id="dT"></span></div>
+  </div>
+  <div class="hd-r">
+    <button class="ic" onclick="toggleTheme()" title="테마 전환"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"/></svg></button>
+    <button class="ic" onclick="openSet()" title="설정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
+  </div>
+</div>
+
+<!-- ACCOUNT -->
+<div class="acct card-enter">
+  <div class="acct-label">내 투자</div>
+  <div class="acct-total num" id="vT">—</div>
+  <div class="acct-pnl flat num" id="vP"></div>
+  <div class="acct-chips">
+    <div class="chip"><div class="chip-label">매수가능</div><div class="chip-value num" id="vC">—</div></div>
+    <div class="chip"><div class="chip-label">보유종목</div><div class="chip-value" id="vN">0개</div></div>
+  </div>
+</div>
+
+<!-- ACTION -->
+<div class="act-area" id="actA">
+  <button class="act-btn act-go" onclick="doStart()">자동매매 시작</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab on" data-t="w" onclick="go('w')">감시목록</div>
+  <div class="tab" data-t="h" onclick="go('h')">보유종목</div>
+  <div class="tab" data-t="l" onclick="go('l')">매매내역</div>
+</div>
+
+<!-- WATCH -->
+<div id="pW" class="list"><div id="wL"></div>
+<div id="eW" class="empty"><div class="empty-ic">🎯</div><div class="empty-t">감시 중인 종목이 없어요</div><div class="empty-s">아래 + 버튼을 눌러<br>종목을 추가해보세요</div></div></div>
+
+<!-- HOLD -->
+<div id="pH" class="list" style="display:none"><div id="hL"></div>
+<div id="eH" class="empty"><div class="empty-ic">📋</div><div class="empty-t">보유 종목이 없어요</div><div class="empty-s">자동매매를 시작하면<br>여기에 표시돼요</div></div></div>
+
+<!-- LOG -->
+<div id="pL" class="list" style="display:none"><div id="lL"></div>
+<div id="eL" class="empty"><div class="empty-ic">📝</div><div class="empty-t">매매 내역이 없어요</div></div></div>
+
+<!-- FAB -->
+<button class="fab" onclick="openAdd()">+</button>
+
+<!-- OVERLAY -->
+<div class="ov" id="ov" onclick="shut()"></div>
+
+<!-- ADD DRAWER -->
+<div class="dw" id="dwA">
+<div class="dw-bar"></div>
+<div class="dw-title">종목 추가</div>
+<div class="fld"><div class="fld-l">종목 검색</div>
+<input class="fld-i" id="aQ" placeholder="종목명 또는 코드를 입력하세요" autocomplete="off" oninput="doSr(this.value)">
+<div class="sr" id="aR" style="display:none"></div></div>
+<div id="aPV" style="display:none"></div>
+<input type="hidden" id="aC">
+<div class="fld"><div class="fld-l">매수 조건</div>
+<select class="fld-i" id="aCo" onchange="$('aThW').style.display=this.value==='immediate'?'none':''">
+<option value="immediate">즉시 매수</option><option value="price_below">현재가 이하이면 매수</option>
+<option value="price_above">현재가 이상이면 매수</option><option value="change_above">등락률 이상이면 매수</option>
+<option value="change_below">등락률 이하이면 매수</option></select></div>
+<div class="fld" id="aThW"><div class="fld-l">기준값</div><input class="fld-i num" id="aTh" type="number" step="any" placeholder="가격(원) 또는 등락률(%)"></div>
+<div class="fld-row">
+<div class="fld"><div class="fld-l">익절 % (선택)</div><input class="fld-i num" id="aTP" type="number" step="0.1" placeholder="글로벌 설정"></div>
+<div class="fld"><div class="fld-l">손절 % (선택)</div><input class="fld-i num" id="aSL" type="number" step="0.1" placeholder="글로벌 설정"></div>
+</div>
+<button class="btn-f btn-dark" id="aBtn" onclick="submitAdd()" disabled>종목을 먼저 선택하세요</button>
+</div>
+
+<!-- SETTINGS DRAWER -->
+<div class="dw" id="dwS">
+<div class="dw-bar"></div>
+<div class="dw-title">설정</div>
+<div class="set-i"><span class="set-l">조건식 번호</span><input class="set-v" id="sS" value="1"></div>
+<div class="set-i"><span class="set-l">1주 최대 가격</span><input class="set-v num" id="sB" type="number" value="5000"></div>
+<div class="set-i"><span class="set-l">최대 보유 종목</span><input class="set-v" id="sM" type="number" value="1"></div>
+<div class="set-i"><span class="set-l">손절</span><input class="set-v num" id="sSL" type="number" step="0.1" value="-2.0"></div>
+<div class="set-i"><span class="set-l">익절</span><input class="set-v num" id="sTP" type="number" step="0.1" value="2.0"></div>
+<div class="set-i"><span class="set-l">시작 시간</span><input class="set-v" type="time" id="sSt" value="09:00"></div>
+<div class="set-i"><span class="set-l">종료 시간</span><input class="set-v" type="time" id="sEn" value="15:30"></div>
+<div style="padding-top:20px"><button class="btn-f btn-dark" onclick="saveSet()">저장</button></div>
+</div>
+
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const F=n=>{const v=Number(n);return isNaN(v)?'—':v.toLocaleString('ko-KR')};
+const P=(u,b)=>fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+const D=(u,b)=>fetch(u,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+let S={is_trading:false,signals:{},rules:[],cash:0};
+
+// WS
+let ws;function wsC(){const p=location.protocol==='https:'?'wss':'ws';ws=new WebSocket(`${p}://${location.host}/ws`);
+ws.onmessage=e=>{const m=JSON.parse(e.data);h(m.type,m.data)};ws.onclose=()=>{$('dW').className='dot';setTimeout(wsC,3000)};ws.onerror=()=>ws.close()}
+
+function h(t,d){
+if(t==='init'){S={...S,...d};rAll()}
+else if(t==='account'){S.cash=d.cash||S.cash;S.position_count=d.position_count??S.position_count;rA()}
+else if(t==='signal_new'||t==='signal_update'){S.signals=S.signals||{};const c=(d.stock_code||'').replace(/^A/,'');if(c)S.signals[c]=d;rW()}
+else if(t==='positions'){rP(d)}
+else if(t==='log'){aL(d)}
+else if(t==='execution'){aL(d);toast(d.details||'체결 완료')}
+else if(t==='status'){S.is_trading=d.is_trading;rTr()}
+else if(t==='rules'){S.rules=d.rules||[];rW()}
+else if(t==='settings'){S={...S,...d};rA();rSF()}}
+
+function rAll(){rA();rTr();rWs();rW();rSF();if(S.logs)S.logs.forEach(l=>aL(l))}
+
+function rA(){$('vC').textContent=F(S.cash||0)+'원';$('vN').textContent=(S.position_count||0)+'개'}
+function rTr(){const on=S.is_trading;$('dT').className='dot'+(on?' live':'');
+$('actA').innerHTML=on?'<button class="act-btn act-stop" onclick="doStop()">자동매매 중지</button>':'<button class="act-btn act-go" onclick="doStart()">자동매매 시작</button>'}
+function rWs(){$('dW').className='dot'+(S.ws_connected?' on':'')}
+function rSF(){if(S.condition_seq)$('sS').value=S.condition_seq;if(S.buy_amount)$('sB').value=S.buy_amount;if(S.max_stocks)$('sM').value=S.max_stocks;if(S.stop_loss_rate)$('sSL').value=S.stop_loss_rate;if(S.profit_cut_rate)$('sTP').value=S.profit_cut_rate}
+
+// WATCHLIST
+function rW(){const el=$('wL');el.innerHTML='';const rules=S.rules||[];
+$('eW').style.display=rules.length?'none':'';
+rules.forEach((r,i)=>{const sig=S.signals&&S.signals[r.stock_code]||{};
+const price=Number(sig.current_price||0),chg=Number(sig.change_rate||0);
+const condT={immediate:'즉시 매수',price_below:'≤ '+F(r.threshold)+'원',price_above:'≥ '+F(r.threshold)+'원',change_above:'등락률 ≥'+r.threshold+'%',change_below:'등락률 ≤'+r.threshold+'%'};
+const badge=r.triggered?'<span class="badge badge-t">매수완료</span>':r.enabled?'<span class="badge badge-w">감시중</span>':'';
+const ini=(r.stock_name||r.stock_code).charAt(0);
+const d=document.createElement('div');d.className='item fi';d.style.animationDelay=i*60+'ms';
+d.innerHTML=`<div class="item-av">${ini}</div>
+<div class="item-body"><div class="item-name">${r.stock_name||r.stock_code} ${badge}</div>
+<div class="item-sub">${r.stock_code} · ${condT[r.condition]||r.condition}</div></div>
+<div class="item-r">${price?`<div class="item-price num">${F(price)}원</div>
+<div class="item-chg ${chg>0?'up':chg<0?'down':'flat'} num">${chg>0?'+':''}${chg.toFixed(2)}%</div>`:'<div class="item-price" style="color:var(--text-muted)">—</div>'}</div>
+<button class="x-btn" onclick="delR('${r.stock_code}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+el.appendChild(d)})}
+
+// POSITIONS
+function rP(d){const list=d.list||[];S.position_count=d.count;S.cash=d.cash||S.cash;
+const el=$('hL');$('eH').style.display=list.length?'none':'';
+if(!list.length){el.innerHTML='';$('vT').textContent=F(S.cash||0)+'원';$('vP').textContent='';$('vP').className='acct-pnl flat num';rA();return}
+el.innerHTML='';let tp=0,tv=0;
+list.forEach((p,i)=>{const r=p.pnl_rate||0,a=p.pnl_amount||0;tp+=a;tv+=p.cur_price*p.qty;
+const ini=(p.name||p.code).charAt(0);
+const d=document.createElement('div');d.className='item fi';d.style.animationDelay=i*60+'ms';
+d.innerHTML=`<div class="item-av">${ini}</div>
+<div class="item-body"><div class="item-name">${p.name||p.code} <span class="badge badge-h">${p.qty}주</span></div>
+<div class="item-sub">${p.code} · 매입 ${F(p.entry_price)}원</div></div>
+<div class="item-r"><div class="item-price num">${F(p.cur_price)}원</div>
+<div class="item-chg ${r>0?'up':r<0?'down':'flat'} num">${r>0?'+':''}${r.toFixed(2)}%</div></div>`;
+el.appendChild(d)});
+const total=tv+(S.cash||0);$('vT').textContent=F(total)+'원';
+const pe=$('vP');if(tp!==0){pe.textContent='어제보다 '+(tp>0?'+':'')+F(tp)+'원';pe.className='acct-pnl num '+(tp>0?'up':tp<0?'down':'flat')}else{pe.textContent='';pe.className='acct-pnl flat num'}
+rA()}
+
+// LOG
+function aL(d){$('eL').style.display='none';const a=(d.action||'').toLowerCase();
+const cls=a.includes('체결')?'c-exec':a.includes('매수')||a.includes('buy')?'c-buy':a.includes('매도')||a.includes('sell')?'c-sell':a.includes('오류')?'c-err':a.includes('경고')?'c-warn':'c-sys';
+const el=document.createElement('div');el.className='log fi';
+el.innerHTML=`<div class="log-t">${d.time||''}</div><div class="log-a ${cls}">${d.action||''}</div><div class="log-d">${d.details||''}</div>`;
+$('lL').prepend(el)}
+
+// TABS
+function go(t){['w','h','l'].forEach(n=>{$('p'+n.toUpperCase()).style.display=n===t?'':'none';
+document.querySelector(`.tab[data-t="${n}"]`).classList.toggle('on',n===t)})}
+
+// DRAWERS
+function openAdd(){$('ov').classList.add('show');$('dwA').classList.add('show');setTimeout(()=>$('aQ').focus(),350)}
+function openSet(){$('ov').classList.add('show');$('dwS').classList.add('show')}
+function shut(){$('ov').classList.remove('show');$('dwA').classList.remove('show');$('dwS').classList.remove('show')}
+
+// SEARCH
+let sT;function doSr(q){clearTimeout(sT);const r=$('aR');if(!q){r.style.display='none';return}
+sT=setTimeout(async()=>{const res=await(await fetch('/api/search?q='+encodeURIComponent(q))).json();
+const items=res.results||[];if(!items.length){r.style.display='none';return}
+r.innerHTML='';r.style.display='block';
+items.forEach(it=>{const d=document.createElement('div');d.className='sr-i';
+d.innerHTML=`<span class="sr-n">${it.name}</span><span class="sr-c">${it.code} · ${it.market}</span>`;
+d.onclick=()=>pick(it);r.appendChild(d)})},200)}
+
+async function pick(it){$('aR').style.display='none';$('aQ').value=it.name;$('aC').value=it.code;
+$('aBtn').disabled=false;$('aBtn').textContent=it.name+' 추가하기';$('aBtn').className='btn-f btn-accent';
+const pv=$('aPV');pv.style.display='block';
+pv.innerHTML=`<div class="pv"><div class="pv-top"><div><div class="pv-nm">${it.name}</div><div class="pv-cd">${it.code} · ${it.market}</div></div><div><div class="pv-pr num" id="pvP">조회중...</div><div class="pv-ch num" id="pvC"></div></div></div></div>`;
+try{const d=await(await fetch('/api/price/'+it.code)).json();
+const p=Number(d.current_price||0),c=Number(d.change_rate||0);
+$('pvP').textContent=p?F(p)+'원':'시세 없음';$('pvP').className='pv-pr num '+(c>0?'up':c<0?'down':'');
+$('pvC').textContent=p?'어제보다 '+(c>0?'+':'')+c.toFixed(2)+'%':'';$('pvC').className='pv-ch num '+(c>0?'up':c<0?'down':'flat')
+}catch(e){$('pvP').textContent='조회 실패'}}
+
+document.addEventListener('click',e=>{if(!e.target.closest('#aQ')&&!e.target.closest('#aR'))$('aR').style.display='none'})
+
+// ACTIONS
+function submitAdd(){const code=$('aC').value;if(!code)return;
+P('/api/rules',{code,condition:$('aCo').value,threshold:parseFloat($('aTh').value)||0,
+tp:$('aTP').value?parseFloat($('aTP').value):null,sl:$('aSL').value?parseFloat($('aSL').value):null});
+shut();$('aQ').value='';$('aC').value='';$('aTh').value='';$('aTP').value='';$('aSL').value='';
+$('aPV').style.display='none';$('aBtn').disabled=true;$('aBtn').textContent='종목을 먼저 선택하세요';$('aBtn').className='btn-f btn-dark';
+toast('감시 종목이 추가되었어요')}
+function delR(c){D('/api/rules',{code:c});toast('종목이 제거되었어요')}
+function doStart(){P('/api/start',{buy_amount:+$('sB').value,max_stocks:+$('sM').value,stop_loss:+$('sSL').value,take_profit:+$('sTP').value})}
+function doStop(){P('/api/stop',{})}
+function saveSet(){P('/api/settings',{condition_seq:$('sS').value,buy_amount:+$('sB').value,max_stocks:+$('sM').value,stop_loss:+$('sSL').value,take_profit:+$('sTP').value});shut();toast('설정이 저장되었어요')}
+
+// THEME
+function toggleTheme(){const t=document.documentElement.dataset.theme==='dark'?'light':'dark';
+document.documentElement.dataset.theme=t;localStorage.setItem('dart-theme',t);
+document.querySelector('meta[name="theme-color"]').content=t==='dark'?'#09090B':'#FAFAFA'}
+(function(){const t=localStorage.getItem('dart-theme')||'light';document.documentElement.dataset.theme=t})()
+
+function toast(m){const el=document.createElement('div');el.className='toast';el.textContent=m;document.body.appendChild(el);setTimeout(()=>el.remove(),2500)}
+wsC()
+</script>
+</body>
+</html>

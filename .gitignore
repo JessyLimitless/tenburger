@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.env
+
+# API 키 (민감 정보)
+config.ini
+
+# Node
+node_modules/
+web/dashboard/node_modules/
+
+# 빌드 결과물은 포함 (서버 배포용)
+!web/dashboard/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 토스증권 참고 이미지
+*.jpg
+
+# 키움 API 문서
+*.pdf
+
+# PyQt5 백업
+app_pyqt.py
+ui/

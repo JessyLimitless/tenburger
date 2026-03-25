@@ -1,0 +1,117 @@
+/* Home — Premium Trading Dashboard */
+.home{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+
+/* ── Hero ── */
+.home-hero{padding:22px 24px 18px}
+.home-hero-top{display:flex;justify-content:space-between;align-items:flex-start}
+.home-hero-label{font-size:13px;color:var(--text-muted);font-weight:500}
+.home-hero-amount{
+  font-size:32px;font-weight:800;color:var(--text-primary);
+  margin:6px 0 3px;letter-spacing:-1.2px;line-height:1;
+}
+.home-hero-amount span{font-size:17px;font-weight:600;margin-left:1px}
+.home-hero-pnl{font-size:13px;font-weight:600;line-height:1.3}
+.home-hero-right{display:flex;flex-direction:column;gap:6px;align-items:flex-end;padding-top:4px}
+.home-hero-chip{display:flex;align-items:center;gap:6px}
+.home-hero-chip-label{font-size:11px;color:var(--text-muted);font-weight:500}
+.home-hero-chip-value{font-size:13px;font-weight:700;color:var(--text-primary);letter-spacing:-.02em}
+
+/* ── CTA ── */
+.home-cta{padding:0 24px 14px}
+.home-cta-btn{
+  width:100%;height:40px;border-radius:10px;font-size:13px;font-weight:600;
+  border:none;cursor:pointer;font-family:inherit;transition:all .12s;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  letter-spacing:-.01em;
+}
+.home-cta-btn.go{background:#F0F0F0;color:var(--text-secondary)}
+.home-cta-btn.stop{background:var(--accent-soft);color:var(--accent)}
+.home-cta-btn svg{width:11px;height:11px}
+
+/* ── Divider ── */
+.home-divider{height:8px;background:var(--bg-secondary)}
+
+/* ── Section ── */
+.home-section-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 24px 10px;
+}
+.home-section-header h3{font-size:17px;font-weight:700;color:var(--text-primary);letter-spacing:-.3px}
+.home-section-count{font-size:13px;font-weight:500;color:var(--text-caption)}
+
+/* ── Stock Item ── */
+.stock-item{
+  display:flex;align-items:center;gap:14px;
+  padding:11px 24px;transition:background .08s;
+  animation:fadeIn .25s ease both;cursor:pointer;
+}
+.stock-item:active{background:var(--bg-secondary)}
+.stock-item-body{flex:1;min-width:0}
+.stock-item-name{
+  font-size:15px;font-weight:600;color:var(--text-primary);
+  display:flex;align-items:center;gap:6px;letter-spacing:-.02em;
+}
+.stock-item-sub{
+  font-size:12px;color:var(--text-muted);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.stock-item-right{text-align:right;flex-shrink:0}
+.stock-item-price{font-size:15px;font-weight:700;color:var(--text-primary);letter-spacing:-.03em}
+.stock-item-change{font-size:11px;font-weight:600;margin-top:2px;letter-spacing:-.01em}
+.stock-item-delete{
+  background:none;border:none;padding:8px;color:var(--text-caption);
+  cursor:pointer;border-radius:8px;flex-shrink:0;display:flex;align-items:center;
+  opacity:0;transition:opacity .15s;
+}
+.stock-item:hover .stock-item-delete{opacity:1}
+@media(max-width:440px){.stock-item-delete{opacity:.3}}
+
+/* ── Badge ── */
+.badge{
+  font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;
+  letter-spacing:.02em;animation:badgePop .25s ease;
+}
+.badge-watching{background:var(--accent-soft);color:var(--accent)}
+.badge-triggered{background:var(--green-soft);color:var(--green)}
+.badge-holding{background:var(--accent-soft);color:var(--accent)}
+
+/* ── Empty ── */
+.home-empty{text-align:center;padding:56px 24px}
+.home-empty svg{color:var(--text-caption)}
+.home-empty-title{font-size:15px;font-weight:600;color:var(--text-secondary);margin:14px 0 4px}
+.home-empty-desc{font-size:13px;color:var(--text-muted);line-height:1.5}
+.home-suggest{display:flex;justify-content:center;gap:8px;margin-top:20px}
+.home-suggest-btn{
+  padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+  background:var(--bg);color:var(--text-secondary);font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:all .12s;
+}
+.home-suggest-btn:active{background:var(--bg-secondary);transform:scale(.95)}
+
+/* ── Recent Trades ── */
+.home-recent{padding:0 24px}
+.home-recent-item{
+  display:flex;gap:12px;padding:10px 0;
+  animation:fadeIn .25s ease both;
+}
+.home-recent-dot{
+  width:6px;height:6px;border-radius:50%;margin-top:6px;flex-shrink:0;
+}
+.home-recent-body{flex:1;min-width:0}
+.home-recent-text{font-size:13px;color:var(--text-secondary);line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-recent-time{font-size:11px;color:var(--text-caption);margin-top:2px}
+
+/* ── FAB ── */
+.fab{
+  position:fixed;
+  bottom:calc(60px + env(safe-area-inset-bottom,0px));
+  right:50%;transform:translateX(calc(220px - 28px));
+  width:48px;height:48px;border-radius:50%;
+  background:var(--text-primary);color:#fff;
+  border:none;font-size:22px;font-weight:300;cursor:pointer;z-index:60;
+  box-shadow:0 3px 16px rgba(0,0,0,.1);
+  display:flex;align-items:center;justify-content:center;
+}
+.fab:active{transform:translateX(calc(220px - 28px)) scale(.88)}
+@media(max-width:440px){.fab{right:20px;transform:none}.fab:active{transform:scale(.88)}}

@@ -1,0 +1,9 @@
+/* Skeleton — Premium shimmer */
+.sk-line,.sk-circle{
+  background:linear-gradient(90deg,var(--skeleton-base) 25%,var(--skeleton-shine) 50%,var(--skeleton-base) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px;margin-bottom:6px;
+}
+.sk-circle{flex-shrink:0;margin-bottom:0;border-radius:12px}
+.sk-card{display:flex;align-items:center;gap:14px;padding:12px 24px}
+.sk-chip{flex:1;padding:14px 16px}
+.sk-home{animation:fadeIn .2s ease}

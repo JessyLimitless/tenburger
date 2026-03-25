@@ -1,0 +1,31 @@
+/* DART Trading — Premium Theme */
+
+:root {
+  --bg: #FFFFFF;
+  --bg-secondary: #F5F5F5;
+  --bg-tertiary: #EBEBEB;
+  --surface: #FFFFFF;
+
+  --text-primary: #191919;
+  --text-secondary: #767676;
+  --text-muted: #AAAAAA;
+  --text-caption: #CCCCCC;
+
+  --border: #F0F0F0;
+  --border-light: #F7F7F7;
+
+  --accent: #E8363C;
+  --accent-soft: rgba(232,54,60,0.05);
+  --blue: #3478F6;
+  --blue-soft: rgba(52,120,246,0.05);
+  --green: #34C759;
+  --green-soft: rgba(52,199,89,0.06);
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.02);
+  --shadow-md: 0 2px 12px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 24px rgba(0,0,0,0.06);
+
+  --overlay-bg: rgba(0,0,0,0.25);
+  --skeleton-base: #F5F5F5;
+  --skeleton-shine: #EBEBEB;
+}

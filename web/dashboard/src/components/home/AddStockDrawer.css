@@ -1,0 +1,61 @@
+/* AddStockDrawer — Premium */
+.add-field{margin-bottom:16px}
+.add-label{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;display:block;letter-spacing:.02em}
+.add-search-wrap{position:relative}
+.add-input{
+  width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;
+  font-size:15px;color:var(--text-primary);outline:none;background:var(--bg);
+  font-family:inherit;transition:border .15s;
+}
+.add-input:focus{border-color:var(--text-secondary)}
+.add-input::placeholder{color:var(--text-caption)}
+.add-select{
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23AAA' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:32px;
+}
+.add-clear{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:var(--bg-secondary);border:none;border-radius:50%;
+  width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);
+}
+.add-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* 검색 결과 — 인라인 (position 없음, overflow 문제 없음) */
+.add-results{
+  border:1.5px solid var(--border);border-radius:12px;
+  margin-bottom:16px;overflow:hidden;max-height:240px;overflow-y:auto;
+  background:var(--bg);
+}
+.add-result-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:13px 16px;cursor:pointer;transition:background .08s;
+}
+.add-result-item:active{background:var(--bg-secondary)}
+.add-result-item+.add-result-item{border-top:1px solid var(--border)}
+.add-result-name{font-weight:600;font-size:14px;color:var(--text-primary)}
+.add-result-code{font-size:12px;color:var(--text-muted)}
+
+.add-loading{
+  padding:16px;text-align:center;font-size:13px;color:var(--text-muted);
+}
+
+/* 시세 미리보기 */
+.add-preview{
+  background:var(--bg-secondary);border-radius:14px;
+  padding:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-start;
+}
+.add-preview-name{font-size:16px;font-weight:700;color:var(--text-primary)}
+.add-preview-code{font-size:12px;color:var(--text-muted);margin-top:2px}
+.add-preview-price{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.add-preview-change{font-size:13px;font-weight:600;margin-top:2px}
+
+/* 제출 */
+.add-submit{
+  width:100%;padding:15px;border:none;border-radius:14px;font-size:15px;
+  font-weight:700;cursor:pointer;font-family:inherit;transition:all .12s;
+  background:var(--border);color:var(--text-muted);
+}
+.add-submit.active{background:var(--accent);color:#fff}
+.add-submit:disabled{cursor:default}
