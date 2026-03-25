@@ -1,6 +1,6 @@
-// StockDetail — 종목 상세 (토스증권 스타일 + DART 톤앤매너)
+// StockDetail — 종목 상세 (버그 수정: 캐시/시세)
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useTrading } from '../../contexts/TradingContext'
 import { formatPrice, formatPercent, priceClass } from '../../constants/theme'
 import { getPrice, getChartData, deleteRule } from '../../lib/api'
@@ -9,7 +9,6 @@ import StockChart from './StockChart'
 import OrderDrawer from './OrderDrawer'
 import './StockDetail.css'
 
-// 가짜 차트 데이터 생성 (실제 API 연동 전 placeholder)
 function generateChartData(basePrice, count = 78) {
   const data = []
   const now = Math.floor(Date.now() / 1000)
@@ -28,40 +27,56 @@ export default function StockDetail() {
   const { state } = useTrading()
   const toast = useToast()
 
-  const sig = state.signals[code] || {}
+  // 종목 변경 시 모든 상태 초기화
   const [priceData, setPriceData] = useState(null)
+  const [chartData, setChartData] = useState([])
   const [activeTab, setActiveTab] = useState('차트')
-  const [orderSide, setOrderSide] = useState(null) // 'buy' | 'sell' | null
+  const [orderSide, setOrderSide] = useState(null)
+  const [loading, setLoading] = useState(true)
 
+  // 종목 변경 시 초기화 + 데이터 새로 로드
+  useEffect(() => {
+    setPriceData(null)
+    setChartData([])
+    setActiveTab('차트')
+    setOrderSide(null)
+    setLoading(true)
+
+    // 시세 조회
+    getPrice(code).then(d => {
+      setPriceData(d)
+      const p = Number(d?.current_price || 0)
+
+      // 차트 데이터
+      getChartData(code).then(cdata => {
+        if (cdata && cdata.length > 0) {
+          setChartData(cdata)
+        } else if (p > 0) {
+          setChartData(generateChartData(p))
+        }
+        setLoading(false)
+      }).catch(() => {
+        if (p > 0) setChartData(generateChartData(p))
+        setLoading(false)
+      })
+    }).catch(() => setLoading(false))
+  }, [code])
+
+  // 실시간 시세 (WebSocket에서 업데이트)
+  const sig = state.signals[code] || {}
   const price = Number(priceData?.current_price || sig.current_price || 0)
   const chg = Number(priceData?.change_rate || sig.change_rate || 0)
   const name = priceData?.stock_name || sig.stock_name || sig.name || code
+  const volume = Number(priceData?.volume || sig.volume || 0)
 
-  const [chartData, setChartData] = useState([])
-
-  // 시세 + 차트 데이터 조회
-  useEffect(() => {
-    getPrice(code).then(d => setPriceData(d)).catch(() => {})
-    getChartData(code).then(data => {
-      if (data && data.length > 0) {
-        setChartData(data)
-      } else if (price > 0) {
-        // 체결 데이터 없으면 placeholder
-        setChartData(generateChartData(price))
-      }
-    }).catch(() => {
-      if (price > 0) setChartData(generateChartData(price))
-    })
-  }, [code])
-
-  const chartColor = chg >= 0 ? 'var(--positive)' : 'var(--negative)'
-  const cssChartColor = chg >= 0 ? '#DC2626' : '#2563EB'
+  const cssChartColor = chg >= 0 ? '#E8363C' : '#3478F6'
 
   // 룰 정보
   const rule = state.rules.find(r => r.stock_code === code)
 
-  // 보유 정보
-  const position = state.positions.find(p => p.code === code)
+  // 보유 정보 — code 키 다양한 형태 매칭
+  const positions = Array.isArray(state.positions) ? state.positions : []
+  const position = positions.find(p => p.code === code || p.stock_code === code)
 
   const handleRemove = async () => {
     await deleteRule(code)
@@ -72,7 +87,7 @@ export default function StockDetail() {
   const tabs = ['차트', '내 주식', '종목정보']
 
   return (
-    <div className="detail" style={{ animation: 'pageEnter 0.45s cubic-bezier(0.32,0.72,0,1)' }}>
+    <div className="detail" style={{ animation: 'pageEnter .4s cubic-bezier(.32,.72,0,1)' }}>
       {/* 헤더 */}
       <div className="detail-header">
         <button className="detail-back touch-press" onClick={() => navigate(-1)}>
@@ -88,15 +103,21 @@ export default function StockDetail() {
         )}
       </div>
 
-      {/* 가격 히어로 — 토스 스타일 */}
+      {/* 가격 히어로 */}
       <div className="detail-hero">
         <div className="detail-name">{name}</div>
-        <div className="detail-price num">
-          {price ? formatPrice(price) + '원' : '—'}
-        </div>
-        <div className={`detail-change num ${priceClass(chg)}`}>
-          {price ? `어제보다 ${chg > 0 ? '+' : ''}${formatPrice(Math.abs(Math.round(price * chg / 100)))}원 (${formatPercent(chg)})` : ''}
-        </div>
+        {loading ? (
+          <div className="detail-price num" style={{ color: 'var(--text-muted)' }}>불러오는 중...</div>
+        ) : (
+          <>
+            <div className="detail-price num">
+              {price ? formatPrice(price) + '원' : '—'}
+            </div>
+            <div className={`detail-change num ${priceClass(chg)}`}>
+              {price ? `어제보다 ${chg > 0 ? '+' : ''}${formatPrice(Math.abs(Math.round(price * chg / 100)))}원 (${formatPercent(chg)})` : ''}
+            </div>
+          </>
+        )}
       </div>
 
       {/* 탭 */}
@@ -118,14 +139,16 @@ export default function StockDetail() {
           {chartData.length > 0 ? (
             <StockChart data={chartData} color={cssChartColor} height={220} />
           ) : (
-            <div className="detail-chart-empty">시세 데이터를 불러오는 중...</div>
+            <div className="detail-chart-empty">
+              {loading ? '차트 데이터 로드 중...' : '차트 데이터 없음'}
+            </div>
           )}
         </div>
       )}
 
       {/* 내 주식 탭 */}
       {activeTab === '내 주식' && (
-        <div className="detail-section" style={{ animation: 'fadeIn 0.25s ease' }}>
+        <div className="detail-section" style={{ animation: 'fadeIn 0.2s ease' }}>
           {position ? (
             <div className="detail-info-grid">
               <div className="detail-info-item">
@@ -134,15 +157,25 @@ export default function StockDetail() {
               </div>
               <div className="detail-info-item">
                 <span className="detail-info-label">매입가</span>
-                <span className="detail-info-value num">{formatPrice(position.entry_price)}원</span>
+                <span className="detail-info-value num">{formatPrice(position.entry_price || position.avg_price)}원</span>
               </div>
               <div className="detail-info-item">
                 <span className="detail-info-label">현재가</span>
-                <span className={`detail-info-value num ${priceClass(position.pnl_rate)}`}>{formatPrice(position.cur_price)}원</span>
+                <span className={`detail-info-value num ${priceClass(position.pnl_rate)}`}>{formatPrice(position.cur_price || price)}원</span>
               </div>
               <div className="detail-info-item">
                 <span className="detail-info-label">수익률</span>
                 <span className={`detail-info-value num ${priceClass(position.pnl_rate)}`}>{formatPercent(position.pnl_rate)}</span>
+              </div>
+              <div className="detail-info-item">
+                <span className="detail-info-label">평가금액</span>
+                <span className="detail-info-value num">{formatPrice((position.cur_price || price) * position.qty)}원</span>
+              </div>
+              <div className="detail-info-item">
+                <span className="detail-info-label">평가손익</span>
+                <span className={`detail-info-value num ${priceClass(position.pnl_amount)}`}>
+                  {position.pnl_amount > 0 ? '+' : ''}{formatPrice(position.pnl_amount)}원
+                </span>
               </div>
             </div>
           ) : (
@@ -162,7 +195,7 @@ export default function StockDetail() {
               </div>
               {(rule.tp != null || rule.sl != null) && (
                 <div className="detail-rule-sub">
-                  {rule.tp != null ? `TP ${rule.tp}%` : ''} {rule.sl != null ? `SL ${rule.sl}%` : ''}
+                  {rule.tp != null ? `익절 ${rule.tp}%` : ''} {rule.sl != null ? `손절 ${rule.sl}%` : ''}
                 </div>
               )}
             </div>
@@ -172,7 +205,7 @@ export default function StockDetail() {
 
       {/* 종목정보 탭 */}
       {activeTab === '종목정보' && (
-        <div className="detail-section" style={{ animation: 'fadeIn 0.25s ease' }}>
+        <div className="detail-section" style={{ animation: 'fadeIn 0.2s ease' }}>
           <div className="detail-info-grid">
             <div className="detail-info-item">
               <span className="detail-info-label">종목코드</span>
@@ -188,13 +221,13 @@ export default function StockDetail() {
             </div>
             <div className="detail-info-item">
               <span className="detail-info-label">거래량</span>
-              <span className="detail-info-value num">{formatPrice(sig.volume || 0)}</span>
+              <span className="detail-info-value num">{formatPrice(volume)}</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* 하단 매수/매도 버튼 — 토스 스타일 */}
+      {/* 하단 매수/매도 버튼 */}
       <div className="detail-bottom">
         <button className="detail-btn detail-btn-sell touch-press" onClick={() => setOrderSide('sell')}>판매하기</button>
         <button className="detail-btn detail-btn-buy touch-press" onClick={() => setOrderSide('buy')}>구매하기</button>

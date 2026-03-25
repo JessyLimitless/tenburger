@@ -29,7 +29,7 @@ export default function App() {
       {!isDetail && <Header onOpenSettings={() => setSettingsOpen(true)} />}
 
       <Suspense fallback={<PageFallback />}>
-        <Routes>
+        <Routes key={location.pathname}>
           <Route path="/" element={<Home />} />
           <Route path="/portfolio" element={<Portfolio />} />
           <Route path="/log" element={<TradeLog />} />
