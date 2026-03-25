@@ -30,7 +30,7 @@ export default function StockDetail() {
 
   const sig = state.signals[code] || {}
   const [priceData, setPriceData] = useState(null)
-  const [activeTab, setActiveTab] = useState('chart')
+  const [activeTab, setActiveTab] = useState('차트')
   const [orderSide, setOrderSide] = useState(null) // 'buy' | 'sell' | null
 
   const price = Number(priceData?.current_price || sig.current_price || 0)
