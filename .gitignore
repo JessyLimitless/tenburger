@@ -34,3 +34,9 @@ Thumbs.db
 # PyQt5 백업
 app_pyqt.py
 ui/
+
+# 매매 로그 데이터
+data/
+
+# GIF 홍보 이미지
+*.gif

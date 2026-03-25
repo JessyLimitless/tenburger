@@ -154,6 +154,18 @@ export function TradingProvider({ children }) {
     ws.onmessage = (e) => {
       try {
         const { type, data } = JSON.parse(e.data)
+
+        // 체결 시 브라우저 알림
+        if (type === 'execution' && data?.details) {
+          try {
+            if (Notification.permission === 'granted') {
+              new Notification('DART Trading', { body: data.details, icon: '/favicon.svg' })
+            } else if (Notification.permission !== 'denied') {
+              Notification.requestPermission()
+            }
+          } catch {}
+        }
+
         const map = {
           init: 'INIT',
           account: 'ACCOUNT',

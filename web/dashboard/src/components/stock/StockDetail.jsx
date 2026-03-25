@@ -64,10 +64,22 @@ export default function StockDetail() {
 
   // 실시간 시세 (WebSocket에서 업데이트)
   const sig = state.signals[code] || {}
-  const price = Number(priceData?.current_price || sig.current_price || 0)
-  const chg = Number(priceData?.change_rate || sig.change_rate || 0)
-  const name = priceData?.stock_name || sig.stock_name || sig.name || code
-  const volume = Number(priceData?.volume || sig.volume || 0)
+  const livePrice = Number(sig.current_price || 0)
+  const price = livePrice || Number(priceData?.current_price || 0)
+  const chg = Number(sig.change_rate || priceData?.change_rate || 0)
+  const name = sig.stock_name || priceData?.stock_name || sig.name || code
+  const volume = Number(sig.volume || priceData?.volume || 0)
+
+  // 실시간 틱 → 차트에 포인트 추가
+  useEffect(() => {
+    if (livePrice > 0 && chartData.length > 0) {
+      const now = Math.floor(Date.now() / 1000)
+      const last = chartData[chartData.length - 1]
+      if (now > last.time) {
+        setChartData(prev => [...prev, { time: now, value: livePrice }])
+      }
+    }
+  }, [livePrice])
 
   const cssChartColor = chg >= 0 ? '#E8363C' : '#3478F6'
 

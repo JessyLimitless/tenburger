@@ -117,6 +117,26 @@ def _on_log_update(data: dict):
     action = (data.get("action") or "").lower()
     if "체결" in action or "confirm" in action:
         broadcast("execution", data)
+    # 매매 관련 로그는 파일에 영속 저장
+    if any(k in action for k in ("매수", "매도", "체결", "주문", "룰")):
+        _persist_log(data)
+
+
+def _persist_log(data: dict):
+    """매매 로그를 JSON 파일에 영속 저장"""
+    import datetime as dt
+    log_dir = Path(__file__).parent.parent / "data"
+    log_dir.mkdir(exist_ok=True)
+    today = dt.date.today().isoformat()
+    log_file = log_dir / f"trades_{today}.json"
+    try:
+        existing = []
+        if log_file.exists():
+            existing = json.loads(log_file.read_text(encoding="utf-8"))
+        existing.append(data)
+        log_file.write_text(json.dumps(existing, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:
+        print(f"[로그 저장] 오류: {e}")
 
 
 def _on_condition_list(data: dict):
@@ -193,7 +213,23 @@ async def startup():
     # 종목 마스터 로딩 (백그라운드)
     threading.Thread(target=_load_stock_master, daemon=True).start()
 
-    print("[Web] Vanilla Trading 서버 시작")
+    # 오늘 매매 로그 복원
+    _restore_today_logs()
+
+    print("[Web] DART Trading 서버 시작")
+
+
+def _restore_today_logs():
+    """서버 재시작 시 오늘 매매 로그를 메모리에 복원"""
+    import datetime as dt
+    log_file = Path(__file__).parent.parent / "data" / f"trades_{dt.date.today().isoformat()}.json"
+    if log_file.exists():
+        try:
+            logs = json.loads(log_file.read_text(encoding="utf-8"))
+            _log_history.extend(logs)
+            print(f"[로그 복원] 오늘 매매 로그 {len(logs)}건 복원")
+        except Exception as e:
+            print(f"[로그 복원] 오류: {e}")
 
 
 @app.on_event("shutdown")
