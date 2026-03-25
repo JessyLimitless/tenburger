@@ -60,33 +60,44 @@ class TraderLogic:
         self.signal_detected = EventEmitter()
         self.signal_realtime_update = EventEmitter()
 
-        # 1) 설정 로드
+        # 1) 설정 로드 (.env 우선 → config.ini 폴백)
+        import os
+        from pathlib import Path
+
+        # .env 파일 로드 (있으면)
+        env_path = Path("." ) / ".env"
+        if env_path.exists():
+            for line in env_path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    os.environ.setdefault(k.strip(), v.strip())
+
         config = configparser.ConfigParser()
         config.read("config.ini", encoding="utf-8")
         self.config = config
 
-        # 2) API 키 로드
-        if "KIWOOM_API" not in config:
-            print("[치명적 오류] config.ini에 [KIWOOM_API] 섹션이 없습니다.")
-            kiwoom_section = {}
-        else:
-            kiwoom_section = config["KIWOOM_API"]
+        # 2) API 키 로드 (환경변수 우선 → config.ini 폴백)
+        kiwoom_section = config["KIWOOM_API"] if "KIWOOM_API" in config else {}
 
         APP_KEY = (
-            kiwoom_section.get("APP_KEY")
+            os.environ.get("KIWOOM_APP_KEY")
+            or kiwoom_section.get("APP_KEY")
             or kiwoom_section.get("app_key", "")
         )
         APP_SECRET = (
-            kiwoom_section.get("APP_SECRET")
+            os.environ.get("KIWOOM_APP_SECRET")
+            or kiwoom_section.get("APP_SECRET")
             or kiwoom_section.get("app_secret", "")
         )
 
         if not APP_KEY or not APP_SECRET:
-            print("[치명적 오류] config.ini의 [KIWOOM_API] 섹션에 APP_KEY와 APP_SECRET을 추가해야 합니다.")
+            print("[경고] 키움 API 키 미설정. .env 또는 config.ini에 KIWOOM_APP_KEY/KIWOOM_APP_SECRET을 설정하세요.")
 
-        # API 모드 (real / mock)
+        # API 모드 (환경변수 우선)
         self.api_mode = (
-            kiwoom_section.get("MODE")
+            os.environ.get("KIWOOM_MODE")
+            or kiwoom_section.get("MODE")
             or kiwoom_section.get("mode", "real")
         )
 
